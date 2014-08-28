@@ -4,6 +4,9 @@ import mangaGet
 import optparse
 import signal
 
+
+tags=''
+
 def sigIntHandler(signal, frame):
     # Catch all the CTRL+C
     print '  SigInt Caught, Terminating...'
@@ -11,6 +14,16 @@ def sigIntHandler(signal, frame):
 
 
 if __name__ == '__main__':
+ 
+  for site in mangaGet.Mods:
+    if tags != '':
+      tags += ' or '
+    for tag in site.tags:
+      if tags == '':
+        tags += tag
+      else:
+        tags = '%s, %s' % (tags, tag)
+  
   
   parser=optparse.OptionParser('MangaGet Second Edition')
   
@@ -20,31 +33,32 @@ if __name__ == '__main__':
                     help='Specify a chapter number.%s' % 
                     'For this, -s is a requirement.')
   parser.add_option('--site', action='store', dest='siteName', 
-                    help='Specify a site name.%s %s %s' %
-                    ('Valid options are:', 'mangaEden, me',
-                     'mangaPark, mp.'))
+                    help='Specify a site name. %s %s' %
+                    ('Valid options are:\n', tags))
   
   (results, args) = parser.parse_args()
   signal.signal(signal.SIGINT, sigIntHandler)
   
+  mod = None
   if not results.siteName == None:
-    if results.siteName == 'mangaPark' or results.siteName == 'mp':
-      mangaGet.site=mangaGet.MangaPark
-    elif results.siteName == 'mangaEden' or results.siteName == 'me':
-      mangaGet.site=mangaGet.MangaEden
-    elif results.siteName == 'pervEden' or results.siteName == 'pe':
-      mangaGet.site=mangaGet.PervEden
-    else:
+    for site in mangaGet.Mods:
+      for siteN in site.tags:
+        if results.siteName == siteN:
+          mod=site
+    if mod == None:
       print 'Your options are mangaPark, mp, mangaEden or me!!!'
       sys.exit(0)
   else:
-    mangaGet.site=mangaGet.MangaEden
+    for site in mangaGet.Mods:
+      for siteN in site.tags:
+        if 'me' == siteN:
+          mod=site
   if not results.chap == None:
     if not results.seriesName == None:
-      mangaGet.getChap(results.seriesName, results.chap, mangaGet.Mods[0])
+      mangaGet.getChap(results.seriesName, results.chap, mod)
     else:
       print 'Please provide a -s (series) with -c'
   elif not results.seriesName == None:
-    mangaGet.getSeries(results.seriesName, site)
+    mangaGet.getSeries(results.seriesName, mod)
   else:
     parser.print_help()

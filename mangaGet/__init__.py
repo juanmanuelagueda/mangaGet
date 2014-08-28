@@ -30,7 +30,7 @@ MangaEden = 'http://www.mangaeden.com/en-manga'
 MangaPark = 'http://www.mangapark.com/manga'
 PervEden = 'http://www.perveden.com/en-manga'
 
-def getPic(site, series, chapter, page, lastPage=1, picUrl=None):
+def getPic(mod, series, chapter, page, lastPage=1, picUrl=None):
     
     # List of variables for this method
     pageName='%02d.jpg' % int(page)
@@ -44,22 +44,8 @@ def getPic(site, series, chapter, page, lastPage=1, picUrl=None):
       return False
     
     if not picUrl:
-      url='%s/%s/%s/%s' % (site,series,chapter,page)
-      buf=getUrl(url)
-      holdPic=''
-      
-      # Read the HTML, grabbing the line we need.
-      while True:
-        buffer=buf.readline(1024)
-        if not buffer:
-          break
-        if 'mainImg' in buffer:
-          holdPic=buffer
-      
-      # Parse the picture's URL from the page's HTML
-      firstCut=re.sub('.*Img" src="', '', holdPic)
-      picUrl='http:%s' % re.sub('" alt=.*', '', firstCut)
-    
+      picUrl = mod.getPicUrl(series, chapter, page, ChapterHold)
+
     # Check to see if the series/chapter folders exist. If not, make them
     if not os.path.exists(series):
       os.mkdir(series)
@@ -147,53 +133,11 @@ def getChap(series, chapter, mod):
     
     # Check for which site we're using. Parse pages for site-specifiy ref.
     pageNums, finalPics = mod.getPages(series, chapter)
-    # Loop for every Picture.
-    for i in pageNums:
-        getPic(site, series, chapter, i, pageNums[-1], finalPics)
-    '''# The catch for mangaPark.
-    elif site == MangaPark:
-      holdPics=[]
-      finalPics=[]
-      chapterUrl=''
-      
-      # Check to see if ChapterHold alredy has what we need.
-      if not ChapterHold:
-        holdChap=urllib2.urlopen('%s/%s' % (site, series))
-        
-        while True:
-          buffer=holdChap.readline(8192)
-          if not buffer: 
-            break
-          if '/%s/s1/' % series in buffer:
-            for splitIt in buffer.split('</a>'):
-              if '/c%s/' % chapter in splitIt:
-                if 'class' in splitIt:
-                  firstCut=re.sub('.*manga', '', splitIt)
-                  chapterUrl=re.sub('/1.*', '', firstCut)
-      # If ChapterHold has what we need, just use it!
-      else:
-        for lines in ChapterHold:
-          if '/%s/s1/' % series in lines:
-            for splitIt in lines.split('</a>'):
-              if '/c%s/' % chapter in splitIt:
-                if 'class' in splitIt:
-                  firstCut=re.sub('.*manga', '', splitIt)
-                  chapterUrl=re.sub('/1.*', '', firstCut)
-      
-      # Once we have the chapter's URL, lets open it.
-      holdPage=urllib2.urlopen('%s%s' % (site, chapterUrl))
-      
-      # Loop through the chapter's URL line by like, parsing the pics out.
-      while True:
-        buffer=holdPage.readline(8192)
-        if not buffer:
-          break
-        if 'a target="_blank' in buffer:
-          firstCut=re.sub('.*href..', '', buffer)
-          finalPics.append(re.sub('" .*', '', firstCut))
-      for i in range(0, len(finalPics)):
-        getPic(site, series, chapter, i+1, len(finalPics), finalPics[i])
-      '''
+
+    # Loop for every Picture
+    for i in range(1, pageNums):
+        getPic(site, series, chapter, i, pageNums, finalPics)
+    
     # Zip our chapter up, and remove the temp folder.
     zipIt('./%s/%s' % (series, chapter), '%s/%s' % (series, zipName),
           chapter)
@@ -224,18 +168,11 @@ def getSeries(series, site):
         break
       
       # Perform a site-specific check, and parse.
-      if site == MangaEden or site == PervEden:
-        if 'chapterLink' in buffer:
-          buffer = re.sub('/1/".*', '', buffer)
-          buffer = re.sub('.*/', '', buffer)
-          chaptrs.append(buffer)
-      elif site == MangaPark:
-        if '/manga/%s' % series in buffer:
-          if '/s1' in buffer:
-            if 'class' in buffer:
-              ChapterHold.append(buffer)
-              firstCut=re.sub('.*/c', '', buffer)
-              chaptrs.append(re.sub('/1.*', '', firstCut))
+      chap, chapHold = mod.parseChapters(buffer)
+      
+      chaptrs.append(chap)
+      if chapHold != None:
+        ChapterHold.append(chapHold)
     
     sys.stdout.write('Chapter index found... %d chapters to get.\n' %
                      len(chaptrs))
