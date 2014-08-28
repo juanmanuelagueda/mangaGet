@@ -17,6 +17,7 @@ import urllib2
 import zipfile
 
 import optparse
+import importlib
 import threading
 
 from os import path
@@ -24,7 +25,7 @@ from os import path
 ChapterHold = None
 CompleteStatus = None
 FullLine = 1
-
+Mods = []
 
 MangaEden = 'http://www.mangaeden.com/en-manga'
 MangaPark = 'http://www.mangapark.com/manga'
@@ -118,7 +119,7 @@ def getPic(site, series, chapter, page, lastPage=1, picUrl=None):
     logFile.close()
 
 
-def getChap(series, chapter, site):
+def getChap(series, chapter, mod):
     global FullLine
     global CompleteStatus
     
@@ -146,31 +147,11 @@ def getChap(series, chapter, site):
  
     
     # Check for which site we're using. Parse pages for site-specifiy ref.
-    if site == MangaEden or site == PervEden:
-      holdPage=urllib2.urlopen('%s/%s/%s/1' % (site, series, chapter))
-      
-      # Read the html line by line, looking the the one we need.
-      while True:
-        buffer=holdPage.readline(8192)
-        if not buffer:
-          break
-        if '<a class="selected"' in buffer:
-          pageHold=buffer
-      
-      # Parse each page name from the line.
-      pageNums=[]
-      pageNums.append('1')
-      for i in re.split('href="', pageHold):
-        if 'en-manga' in i:
-          if not 'Next' in i:
-            firstCut=  re.sub('/en-manga/%s/%s/' %
-                          (series, chapter), '', i)
-            pageNums.append(re.sub('/">.*', '', firstCut))
-      
-      # Loop for every Picture.
-      for i in pageNums:
-        getPic(site, series, chapter, i, pageNums[-1])
-    # The catch for mangaPark.
+    pageNums, finalPics = mod.getPages(series, chapter)
+    # Loop for every Picture.
+    for i in pageNums:
+        getPic(site, series, chapter, i, pageNums[-1], finalPics)
+    '''# The catch for mangaPark.
     elif site == MangaPark:
       holdPics=[]
       finalPics=[]
@@ -213,7 +194,7 @@ def getChap(series, chapter, site):
           finalPics.append(re.sub('" .*', '', firstCut))
       for i in range(0, len(finalPics)):
         getPic(site, series, chapter, i+1, len(finalPics), finalPics[i])
-      
+      '''
     # Zip our chapter up, and remove the temp folder.
     zipIt('./%s/%s' % (series, chapter), '%s/%s' % (series, zipName),
           chapter)
@@ -316,12 +297,19 @@ def statusPrint(message):
       sys.stdout.write(message)
       sys.stdout.flush()
 
+
 def sigIntHandler(signal, frame):
     # Catch all the CTRL+C
     print '  SigInt Caught, Terminating...'
     sys.exit(0)
 
 
+def importer():
+    modList = ['sites.%s' % re.sub(r'\.py', '', f) for f in os.listdir("sites") if f.endswith('.py') and f != '__init__.py']
+    for i in modList:
+      Mods.append(importlib.import_module(i)) 
+    
+importer()
 if __name__ == '__main__':
   
   parser=optparse.OptionParser('MangaGet Second Edition')
@@ -353,7 +341,7 @@ if __name__ == '__main__':
     site=MangaEden
   if not results.chap == None:
     if not results.seriesName == None:
-      getChap(results.seriesName, results.chap, site)
+      getChap(results.seriesName, results.chap, Mods[0])
     else:
       print 'Please provide a -s (series) with -c'
   elif not results.seriesName == None:
