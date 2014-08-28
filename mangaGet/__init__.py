@@ -2,7 +2,7 @@
 
 """
 Author: DarkDragn
-Date:   23May14 
+Date:   28Aug14 
 """
 
 
@@ -26,8 +26,6 @@ CompleteStatus = None
 FullLine = 1
 Mods = []
 
-MangaEden = 'http://www.mangaeden.com/en-manga'
-MangaPark = 'http://www.mangapark.com/manga'
 PervEden = 'http://www.perveden.com/en-manga'
 
 def getPic(mod, series, chapter, page, lastPage=1, picUrl=None):
@@ -136,7 +134,7 @@ def getChap(series, chapter, mod):
 
     # Loop for every Picture
     for i in range(1, pageNums):
-        getPic(site, series, chapter, i, pageNums, finalPics)
+        getPic(mod, series, chapter, i, pageNums, finalPics)
     
     # Zip our chapter up, and remove the temp folder.
     zipIt('./%s/%s' % (series, chapter), '%s/%s' % (series, zipName),
@@ -144,7 +142,7 @@ def getChap(series, chapter, mod):
     shutil.rmtree(path.realpath('%s/%s' % (series, chapter)))
     
 
-def getSeries(series, site):
+def getSeries(series, mod):
     global CompleteStatus
     chaptrs = []
     holdTime=time.localtime()
@@ -152,7 +150,7 @@ def getSeries(series, site):
     # Let the user know what's going on, then flush stdout.
     sys.stdout.write('Looking up the index page for %s...\n' % series)
     sys.stdout.flush()
-    index = urllib2.urlopen('%s/%s' % (site, series))
+    index = urllib2.urlopen('%s/%s' % (mod.site, series))
     
     timeRun='%02d%02d%02d' % (holdTime.tm_year, holdTime.tm_mon, 
                               holdTime.tm_mday)
@@ -184,7 +182,7 @@ def getSeries(series, site):
       chapter = str(chaptrs[len(chaptrs)-(i)]).rstrip('\n')
       while threading.activeCount() > 4:
         time.sleep(.25)
-      thread = threading.Thread(target=getChap, args=(series, chapter, site))
+      thread = threading.Thread(target=getChap, args=(series, chapter, mod))
       thread.start()
       time.sleep(.05)
       
