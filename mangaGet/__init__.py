@@ -304,7 +304,7 @@ def importer():
       Mods.append(importlib.import_module(i)) 
 
 
- def sigIntHandler(signal, frame):
+def sigIntHandler(signal, frame):
     # Catch all the CTRL+C
     print '  SigInt Caught, Terminating...'
     sys.exit(0)
