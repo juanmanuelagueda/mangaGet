@@ -58,8 +58,8 @@ def parseChapters(buffer, series):
         if 'class' in buffer:
           chapterHold = buffer
           firstCut=re.sub('.*/c', '', buffer)
-          secondCut=re.sub('/1.*', '', firstCut)
-    return secondCut, chapterHold
+          finalCut=re.sub('/1.*', '', firstCut)
+    return finalCut, chapterHold
 
 
 def getUrl(url, retries=0):

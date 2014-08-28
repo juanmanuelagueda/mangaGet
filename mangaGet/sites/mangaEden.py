@@ -51,9 +51,9 @@ def getPicUrl(series, chapter, page, chapterHold = None):
 
 def parseChapters(buffer, series):
     if 'chapterLink' in buffer:
-      buffer = re.sub('/1/".*', '', buffer)
-      buffer = re.sub('.*/', '', buffer)
-    return buffer, None
+      firstCut = re.sub('/1/".*', '', buffer)
+      finalCut = re.sub('.*/', '', firstCut)
+    return finalCut, None
 
 
 def getUrl(url, retries=0):
