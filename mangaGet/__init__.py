@@ -12,7 +12,6 @@ import sys
 import time
 
 import shutil
-import signal
 import urllib2
 import zipfile
 
@@ -298,53 +297,18 @@ def statusPrint(message):
       sys.stdout.flush()
 
 
-def sigIntHandler(signal, frame):
+def importer():
+    modList = ['mangaGet.sites.%s' % re.sub(r'\.py', '', f) for f in os.listdir('%s/%s' % 
+                (os.path.dirname(__file__), "sites")) if f.endswith('.py') and f != '__init__.py']
+    for i in modList:
+      Mods.append(importlib.import_module(i)) 
+
+
+ def sigIntHandler(signal, frame):
     # Catch all the CTRL+C
     print '  SigInt Caught, Terminating...'
     sys.exit(0)
 
-
-def importer():
-    modList = ['sites.%s' % re.sub(r'\.py', '', f) for f in os.listdir("sites") if f.endswith('.py') and f != '__init__.py']
-    for i in modList:
-      Mods.append(importlib.import_module(i)) 
-    
+   
 importer()
-if __name__ == '__main__':
-  
-  parser=optparse.OptionParser('MangaGet Second Edition')
-  
-  parser.add_option('-s', action='store', dest='seriesName',
-                    help='Specify a series name. Match the site.')
-  parser.add_option('-c', action='store', dest='chap', 
-                    help='Specify a chapter number.%s' % 
-                    'For this, -s is a requirement.')
-  parser.add_option('--site', action='store', dest='siteName', 
-                    help='Specify a site name.%s %s %s' %
-                    ('Valid options are:', 'mangaEden, me',
-                     'mangaPark, mp.'))
-  
-  (results, args) = parser.parse_args()
-  signal.signal(signal.SIGINT, sigIntHandler)
-  
-  if not results.siteName == None:
-    if results.siteName == 'mangaPark' or results.siteName == 'mp':
-      site=MangaPark
-    elif results.siteName == 'mangaEden' or results.siteName == 'me':
-      site=MangaEden
-    elif results.siteName == 'pervEden' or results.siteName == 'pe':
-      site=PervEden
-    else:
-      print 'Your options are mangaPark, mp, mangaEden or me!!!'
-      sys.exit(0)
-  else:
-    site=MangaEden
-  if not results.chap == None:
-    if not results.seriesName == None:
-      getChap(results.seriesName, results.chap, Mods[0])
-    else:
-      print 'Please provide a -s (series) with -c'
-  elif not results.seriesName == None:
-    getSeries(results.seriesName, site)
-  else:
-    parser.print_help()
+
