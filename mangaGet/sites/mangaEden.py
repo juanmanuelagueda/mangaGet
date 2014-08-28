@@ -8,6 +8,7 @@ site = "http://www.mangaeden.com/en-manga"
 tags = ['me', 'mangaEden', 'MangaEden']
 
 def getPages(series, chapter, chapterHold = None):
+    
     holdPage=urllib2.urlopen('%s/%s/%s/1' % (site, series, chapter))
     
     # Read the html line by line, looking the the one we need.
@@ -27,7 +28,7 @@ def getPages(series, chapter, chapterHold = None):
           firstCut=  re.sub('/en-manga/%s/%s/' %
                         (series, chapter), '', i)
           pageNums.append(re.sub('/">.*', '', firstCut))
-    return len(pageNums), None 
+    return len(pageNums), []
 
 def getPicUrl(series, chapter, page, chapterHold = None):
     url='%s/%s/%s/%s' % (site,series,chapter,page)
@@ -50,9 +51,12 @@ def getPicUrl(series, chapter, page, chapterHold = None):
 
 
 def parseChapters(buffer, series):
+    firstCut = ''
+    finalCut = ''
     if 'chapterLink' in buffer:
       firstCut = re.sub('/1/".*', '', buffer)
-      finalCut = re.sub('.*/', '', firstCut)
+      secondCut = re.sub('.*/', '', firstCut)
+      finalCut = secondCut.replace('\n', '')
     return finalCut, None
 
 

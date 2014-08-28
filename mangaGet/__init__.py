@@ -21,14 +21,14 @@ import threading
 
 from os import path
 
-ChapterHold = None
+ChapterHold = []
 CompleteStatus = None
 FullLine = 1
 Mods = []
 
 PervEden = 'http://www.perveden.com/en-manga'
 
-def getPic(mod, series, chapter, page, lastPage=1, picUrl=None):
+def getPic(mod, series, chapter, page, picUrls,lastPage=1):
     
     # List of variables for this method
     pageName='%02d.jpg' % int(page)
@@ -41,8 +41,10 @@ def getPic(mod, series, chapter, page, lastPage=1, picUrl=None):
                       (series, chapter, pageName))):
       return False
     
-    if not picUrl:
+    if picUrls.__len__() == 0:
       picUrl = mod.getPicUrl(series, chapter, page, ChapterHold)
+    else:
+      picUrl = picUrls[page-1]
 
     # Check to see if the series/chapter folders exist. If not, make them
     if not os.path.exists(series):
@@ -133,8 +135,8 @@ def getChap(series, chapter, mod):
     pageNums, finalPics = mod.getPages(series, chapter)
 
     # Loop for every Picture
-    for i in range(1, pageNums):
-        getPic(mod, series, chapter, i, pageNums, finalPics)
+    for i in range(1, pageNums+1):
+        getPic(mod, series, chapter, i, finalPics, pageNums)
     
     # Zip our chapter up, and remove the temp folder.
     zipIt('./%s/%s' % (series, chapter), '%s/%s' % (series, zipName),
@@ -144,6 +146,7 @@ def getChap(series, chapter, mod):
 
 def getSeries(series, mod):
     global CompleteStatus
+    global ChapterHold
     chaptrs = []
     holdTime=time.localtime()
     
@@ -161,14 +164,14 @@ def getSeries(series, mod):
     # Enumerate the list of chapters for the series.
     while True:
       buffer = index.readline(8192)
-      ChapterHold=[]
       if not buffer:
         break
       
       # Perform a site-specific check, and parse.
       chap, chapHold = mod.parseChapters(buffer, series)
       
-      chaptrs.append(chap)
+      if chap != '':
+        chaptrs.append(chap)
       if chapHold != None:
         ChapterHold.append(chapHold)
     

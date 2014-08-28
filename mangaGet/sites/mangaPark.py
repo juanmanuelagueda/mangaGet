@@ -51,14 +51,15 @@ def getPages(series, chapter, chapterHold = None):
 
 
 def parseChapters(buffer, series):
-    secondCut = None
+    finalCut = ''
     chapterHold = None
     if '/manga/%s' % series in buffer:
       if '/s1' in buffer:
         if 'class' in buffer:
           chapterHold = buffer
-          firstCut=re.sub('.*/c', '', buffer)
-          finalCut=re.sub('/1.*', '', firstCut)
+          firstCut = re.sub('.*/c', '', buffer)
+          secondCut = re.sub('/1.*', '', firstCut)
+          finalCut = secondCut.replace('\n', '')
     return finalCut, chapterHold
 
 

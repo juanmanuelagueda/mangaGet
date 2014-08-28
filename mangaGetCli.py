@@ -3,7 +3,7 @@
 import mangaGet
 import optparse
 import signal
-
+import sys
 
 tags=''
 
