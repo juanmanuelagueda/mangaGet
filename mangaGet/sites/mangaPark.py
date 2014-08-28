@@ -2,6 +2,7 @@
 
 import re
 import urllib2
+import sys
 
 site = 'http://www.mangapark.com/manga'
 tags = ['mp', 'mangaPark', 'MangaPark']
@@ -49,7 +50,9 @@ def getPages(series, chapter, chapterHold = None):
     return len(finalPics), finalPics
 
 
-def parseChapters(buffer):
+def parseChapters(buffer, series):
+    secondCut = None
+    chapterHold = None
     if '/manga/%s' % series in buffer:
       if '/s1' in buffer:
         if 'class' in buffer:
@@ -57,3 +60,17 @@ def parseChapters(buffer):
           firstCut=re.sub('.*/c', '', buffer)
           secondCut=re.sub('/1.*', '', firstCut)
     return secondCut, chapterHold
+
+
+def getUrl(url, retries=0):
+    # Attempt getting the URL object, retry up to four times.
+    while retries < 4:
+      try:
+        hold=urllib2.urlopen(url)
+        return hold
+      except Exception:
+        print 'Error opening the URL. Retrying...'
+        retries+=1
+        print retries
+
+

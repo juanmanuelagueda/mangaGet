@@ -166,7 +166,7 @@ def getSeries(series, mod):
         break
       
       # Perform a site-specific check, and parse.
-      chap, chapHold = mod.parseChapters(buffer)
+      chap, chapHold = mod.parseChapters(buffer, series)
       
       chaptrs.append(chap)
       if chapHold != None:
