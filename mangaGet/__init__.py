@@ -65,6 +65,8 @@ def getPic(mod, series, chapter, page, picUrls,lastPage=1):
                    holdTime.tm_min, holdTime.tm_sec))
     logFile.flush()
     
+    logFileErr=open(path.realpath('%s/logFile.err' % series), 'a')
+    
     # Run the file download, and verify file size
     while not curSize == int(totalSize):
       # Check to see if this is the first try
@@ -84,8 +86,11 @@ def getPic(mod, series, chapter, page, picUrls,lastPage=1):
         
         # Re-open the URL, re-grab the headers, and let the user know 
         # what happened
-        print '\nSomething\'s wrong with the filesize. Retrying...'
-        FullLine = 1
+        errMsg = 'Something\'s wrong with the filesize. Retrying...\n'
+        logFileErr.write("Chapter: %s Page: %s (%s) Current Time: %02d:%02d:%02d  " %
+                        (chapter, page, errMsg,holdTime.tm_hour, 
+                         holdTime.tm_min, holdTime.tm_sec))
+        logFileErr.flush()
         
         up=getUrl(picUrl)
         meta=up.info()
@@ -104,8 +109,11 @@ def getPic(mod, series, chapter, page, picUrls,lastPage=1):
         retries+=1
         
       except Exception:
-        print '\nError while reading the pic from the URL. (%s) Retrying...' % page
-        FullLine = 1
+        errMsg = 'Error while reading the pic from the URL. Retrying...\n'
+        logFileErr.write("Chapter: %s Page: %s (%s) Current Time: %02d:%02d:%02d  " %
+                        (chapter, page, errMsg,holdTime.tm_hour, 
+                         holdTime.tm_min, holdTime.tm_sec))
+        logFileErr.flush()
         retries+=1
     
     # Close out the log... Did it work?
