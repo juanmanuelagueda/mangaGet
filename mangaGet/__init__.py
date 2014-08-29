@@ -208,7 +208,7 @@ def getSeries(series, mod):
       time.sleep(.05)
       
     # Wait for the last thread to finish
-    thread.join(timeout=10)
+    thread.join()
     sys.stdout.write('Finished!!!... \nTook long enough, eh?\n')
     sys.stdout.flush()
     
