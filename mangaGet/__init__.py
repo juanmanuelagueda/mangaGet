@@ -86,8 +86,8 @@ def getPic(mod, series, chapter, page, picUrls,lastPage=1):
         
         # Re-open the URL, re-grab the headers, and let the user know 
         # what happened
-        errMsg = 'Something\'s wrong with the filesize. Retrying...\n'
-        logFileErr.write("Chapter: %s Page: %s (%s) Current Time: %02d:%02d:%02d  " %
+        errMsg = 'Something\'s wrong with the filesize. Retrying...'
+        logFileErr.write("Chapter: %s Page: %s (%s) Current Time: %02d:%02d:%02d  \n" %
                         (chapter, page, errMsg,holdTime.tm_hour, 
                          holdTime.tm_min, holdTime.tm_sec))
         logFileErr.flush()
@@ -109,8 +109,8 @@ def getPic(mod, series, chapter, page, picUrls,lastPage=1):
         retries+=1
         
       except Exception:
-        errMsg = 'Error while reading the pic from the URL. Retrying...\n'
-        logFileErr.write("Chapter: %s Page: %s (%s) Current Time: %02d:%02d:%02d  " %
+        errMsg = 'Error while reading the pic from the URL. Retrying...'
+        logFileErr.write("Chapter: %s Page: %s (%s) Current Time: %02d:%02d:%02d  \n" %
                         (chapter, page, errMsg,holdTime.tm_hour, 
                          holdTime.tm_min, holdTime.tm_sec))
         logFileErr.flush()
