@@ -198,17 +198,20 @@ def getSeries(series, mod):
     
     # Compensate for len beginning at index value of 0. Start at the end of
     # list, and chop off the endline special character.
+    threads = []
     for i in range(1, len(chaptrs)+1):
       chapter = str(chaptrs[len(chaptrs)-(i)]).rstrip('\n')
       while threading.activeCount() > 4:
         time.sleep(.25)
-      thread = threading.Thread(target=getChap, args=(series, chapter, mod))
-      thread.daemon = True
-      thread.start()
+      threads.append(threading.Thread(target=getChap, args=(series, chapter, mod)))
+      threads[-1].daemon = True
+      threads[-1].start()
       time.sleep(.05)
       
     # Wait for the last thread to finish
-    thread.join()
+    for i in threads:
+      if i.isAlive:
+        i.join()
     sys.stdout.write('Finished!!!... \nTook long enough, eh?\n')
     sys.stdout.flush()
     
