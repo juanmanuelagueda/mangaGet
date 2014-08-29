@@ -244,6 +244,13 @@ def getUrl(url, retries=0):
         print retries
 
 
+def searchMod(mod, srchStr, deeper = False):
+    srchTitle, srchUrl = mod.searchSite(srchStr)
+    sys.stdout.write('%s \n' % mod.resultHeader)
+    for title in range(1, len(srchTitle)):
+      sys.stdout.write('%d. %s\n' % (title, srchTitle[title]))
+
+
 def statusPrint(message):
     global FullLine
     if FullLine > 3:
@@ -270,4 +277,3 @@ def sigIntHandler(signal, frame):
 
    
 importer()
-#socket.setdefaulttimeout(20)

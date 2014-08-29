@@ -1,11 +1,12 @@
 #!/usr/bin/python
 
 import re
-import urllib2
 import sys
+import urllib2
 
 site = "http://www.mangaeden.com/en-manga"
 tags = ['me', 'mangaEden', 'MangaEden']
+resultHeader = '***//////// MangaEden Search Results \\\\\\\\\\\\\\\\***'
 
 def getPages(series, chapter, chapterHold = None):
     retries = 0
@@ -57,16 +58,6 @@ def getPicUrl(series, chapter, page, chapterHold = None):
     return picUrl
 
 
-def parseChapters(buffer, series):
-    firstCut = ''
-    finalCut = ''
-    if 'chapterLink' in buffer:
-      firstCut = re.sub('/1/".*', '', buffer)
-      secondCut = re.sub('.*/', '', firstCut)
-      finalCut = secondCut.replace('\n', '')
-    return finalCut, None
-
-
 def getUrl(url, retries=0):
     # Attempt getting the URL object, retry up to four times.
     while retries < 4:
@@ -79,3 +70,33 @@ def getUrl(url, retries=0):
         print retries
 
 
+def parseChapters(buffer, series):
+    firstCut = ''
+    finalCut = ''
+    if 'chapterLink' in buffer:
+      firstCut = re.sub('/1/".*', '', buffer)
+      secondCut = re.sub('.*/', '', firstCut)
+      finalCut = secondCut.replace('\n', '')
+    return finalCut, None
+
+
+def searchSite(srchStr):
+    url='http://www.mangaeden.com/en-directory/?title=%s' % srchStr
+    urlHold = urllib2.urlopen(url)
+    title = ['']
+    urlRoot = ['']
+    while True:
+      buffer = urlHold.readline()
+      
+      if not buffer:
+        break
+  
+      if 'en-manga' in buffer:
+        if 'class' in buffer:
+          firstCut = re.sub('^<.*manga.', '', buffer)
+          secondCut = re.sub('<.*', '', firstCut)
+          urlRootHold, titleHold = re.split('.".*Manga..', secondCut)
+          
+          urlRoot.append(urlRootHold)
+          title.append(titleHold.replace('\n', ''))
+    return title, urlRoot
