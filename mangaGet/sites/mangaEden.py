@@ -9,7 +9,7 @@ tags = ['me', 'mangaEden', 'MangaEden']
 
 def getPages(series, chapter, chapterHold = None):
     
-    holdPage=urllib2.urlopen('%s/%s/%s/1' % (site, series, chapter))
+    holdPage=urllib2.urlopen('%s/%s/%s/1' % (site, series, chapter), timeout = 20.0)
     
     # Read the html line by line, looking the the one we need.
     while True:

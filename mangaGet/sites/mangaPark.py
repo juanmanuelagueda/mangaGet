@@ -14,7 +14,7 @@ def getPages(series, chapter, chapterHold = None):
     
     # Check to see if ChapterHold alredy has what we need.
     if not chapterHold:
-      holdChap=urllib2.urlopen('%s/%s' % (site, series))
+      holdChap=urllib2.urlopen('%s/%s' % (site, series), timeout = 20.0)
       
       while True:
         buffer=holdChap.readline(8192)

@@ -11,6 +11,7 @@ import re
 import sys
 import time
 
+import socket
 import shutil
 import urllib2
 import zipfile
@@ -31,6 +32,7 @@ PervEden = 'http://www.perveden.com/en-manga'
 def getPic(mod, series, chapter, page, picUrls,lastPage=1):
     
     # List of variables for this method
+    global FullLine
     pageName='%02d.jpg' % int(page)
     holdTime=time.localtime()
     retries=0
@@ -75,19 +77,25 @@ def getPic(mod, series, chapter, page, picUrls,lastPage=1):
         # Delete the URL object, and headers
         up.close()
         del up, meta
-        os.remove(path.realpath('%s/%s/%s' % (series, chapter, pageName)))
-        print 'Something\'s wrong with the filesize. Retrying...'
+        try:
+          os.remove(path.realpath('%s/%s/%s' % (series, chapter, pageName)))
+        except Exception:
+          pass
         
         # Re-open the URL, re-grab the headers, and let the user know 
-        #what happened
+        # what happened
+        print '\nSomething\'s wrong with the filesize. Retrying...'
+        FullLine = 1
+        
         up=getUrl(picUrl)
         meta=up.info()
         totalSize=meta.getheader('content-length')
       
       # Try, Except for any 404 errors or such
       try:
+        buffer = up.read()
         with open(path.realpath('%s/%s/%s' % (series, chapter, pageName)), 'wb') as f:
-          f.write(up.read())
+          f.write(buffer)
           f.close()
         
         # Get final size, and increment retries counter
@@ -96,7 +104,8 @@ def getPic(mod, series, chapter, page, picUrls,lastPage=1):
         retries+=1
         
       except Exception:
-        print 'Error while reading the pic from the URL. Retrying...'
+        print '\nError while reading the pic from the URL. (%s) Retrying...' % page
+        FullLine = 1
         retries+=1
     
     # Close out the log... Did it work?
@@ -186,11 +195,12 @@ def getSeries(series, mod):
       while threading.activeCount() > 4:
         time.sleep(.25)
       thread = threading.Thread(target=getChap, args=(series, chapter, mod))
+      thread.daemon = True
       thread.start()
       time.sleep(.05)
       
     # Wait for the last thread to finish
-    thread.join()
+    thread.join(timeout=10)
     sys.stdout.write('Finished!!!... \nTook long enough, eh?\n')
     sys.stdout.flush()
     
@@ -215,7 +225,7 @@ def getUrl(url, retries=0):
     # Attempt getting the URL object, retry up to four times.
     while retries < 4:
       try:
-        hold=urllib2.urlopen(url)
+        hold=urllib2.urlopen(url, timeout=20.0)
         return hold
       except Exception:
         print 'Error opening the URL. Retrying...'
@@ -249,4 +259,4 @@ def sigIntHandler(signal, frame):
 
    
 importer()
-
+#socket.setdefaulttimeout(20)
