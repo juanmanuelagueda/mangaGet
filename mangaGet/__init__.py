@@ -239,9 +239,8 @@ def getUrl(url, retries=0):
         hold=urllib2.urlopen(url, timeout=20.0)
         return hold
       except Exception:
-        print 'Error opening the URL. Retrying...'
         retries+=1
-        print retries
+        print 'Error opening the URL. Retrying(%d)...' % retries
 
 
 def searchMod(mod, srchStr):

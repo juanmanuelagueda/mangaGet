@@ -58,17 +58,28 @@ if __name__ == '__main__':
       for siteN in site.tags:
         if 'me' == siteN:
           mod=site
+          
   if not results.search == None:
     results.seriesName = mangaGet.searchMod(mod, results.search)
     searched = True
+    
   if searched:
     if not results.searchPass:
       sys.exit(0)
+      
   if not results.chap == None:
     if not results.seriesName == None:
-      mangaGet.getChap(results.seriesName, results.chap, mod)
+      if '-' in results.chap:
+        holdChaps = results.chap.split('-')
+        sys.stdout.write('Starting on %s... \n' % results.seriesName)
+        for i in range(int(holdChaps[0]), int(holdChaps[1])+1):
+          mangaGet.getChap(results.seriesName, str(i), mod)
+        sys.stdout.write('\nFinished!!! \n')
+      else:
+        mangaGet.getChap(results.seriesName, results.chap, mod)
     else:
       print 'Please provide a -s (series) with -c'
+
   elif not results.seriesName == None:
     mangaGet.getSeries(results.seriesName, mod)
   else:

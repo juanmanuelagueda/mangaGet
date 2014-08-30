@@ -62,7 +62,7 @@ def getUrl(url, retries=0):
     # Attempt getting the URL object, retry up to four times.
     while retries < 4:
       try:
-        hold=urllib2.urlopen(url)
+        hold=urllib2.urlopen(url, timeout=20.0)
         return hold
       except Exception:
         print 'Error opening the URL. Retrying...'
