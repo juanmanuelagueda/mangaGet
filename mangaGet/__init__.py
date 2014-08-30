@@ -244,11 +244,18 @@ def getUrl(url, retries=0):
         print retries
 
 
-def searchMod(mod, srchStr, deeper = False):
+def searchMod(mod, srchStr):
     srchTitle, srchUrl = mod.searchSite(srchStr)
     sys.stdout.write('%s \n' % mod.resultHeader)
     for title in range(1, len(srchTitle)):
       sys.stdout.write('%d. %s\n' % (title, srchTitle[title]))
+    selection = raw_input('Please select from the above: ')
+    try:
+      selNum = int(selection)
+      sys.stdout.write('Your download string is: %s \n' % srchUrl[selNum])
+      return srchUrl[selNum]
+    except ValueError:
+      sys.stdout.write('Invalid Entry. Exiting... \n')
 
 
 def statusPrint(message):

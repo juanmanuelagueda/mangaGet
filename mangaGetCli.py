@@ -5,7 +5,8 @@ import optparse
 import signal
 import sys
 
-tags=''
+tags = ''
+searched = False
 
 def sigIntHandler(signal, frame):
     # Catch all the CTRL+C
@@ -14,7 +15,7 @@ def sigIntHandler(signal, frame):
 
 
 if __name__ == '__main__':
- 
+  
   for site in mangaGet.Mods:
     if tags != '':
       tags += ' or '
@@ -32,10 +33,14 @@ if __name__ == '__main__':
   parser.add_option('-c', action='store', dest='chap', 
                     help='Specify a chapter number.%s' % 
                     'For this, -s is a requirement.')
+  parser.add_option('--search', action='store', dest='search', 
+                    help='Specify search keywords.')
+  parser.add_option('--sp', action='store_true', dest='searchPass',
+                    default=False, help='Pass search selection as series name.')
   parser.add_option('--site', action='store', dest='siteName', 
                     help='Specify a site name. %s %s' %
                     ('Valid options are:\n', tags))
-  
+ 
   (results, args) = parser.parse_args()
   signal.signal(signal.SIGINT, sigIntHandler)
   
@@ -53,6 +58,12 @@ if __name__ == '__main__':
       for siteN in site.tags:
         if 'me' == siteN:
           mod=site
+  if not results.search == None:
+    results.seriesName = mangaGet.searchMod(mod, results.search)
+    searched = True
+  if searched:
+    if not results.searchPass:
+      sys.exit(0)
   if not results.chap == None:
     if not results.seriesName == None:
       mangaGet.getChap(results.seriesName, results.chap, mod)
