@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 """
 Author: DarkDragn
 Date:   28Aug14 
@@ -20,8 +18,6 @@ import optparse
 import importlib
 import threading
 
-from sites import utilities
-from os import path
 
 ChapterHold = []
 CompleteStatus = None
@@ -50,20 +46,20 @@ def getPic(mod, series, chapter, page, picUrls,lastPage=1):
     if not os.path.exists(series):
       os.mkdir(series)
     if not os.path.exists('%s/%s' % (series, chapter)):
-      os.mkdir(path.realpath('%s/%s' % (series, chapter)))
+      os.mkdir(os.path.realpath('%s/%s' % (series, chapter)))
     
     up=utilities.getUrl(picUrl)
     meta=up.info()
     totalSize= meta.getheader('content-length')
     
     # Make a status entry for the log
-    logFile=open(path.realpath('%s/%s/logFile' % (series, chapter)), 'a')
+    logFile=open(os.path.realpath('%s/%s/logFile' % (series, chapter)), 'a')
     logFile.write("File Number %02d/%02d  Current Time: %02d:%02d:%02d  " %
                   (int(page), int(lastPage), holdTime.tm_hour, 
                    holdTime.tm_min, holdTime.tm_sec))
     logFile.flush()
     
-    logFileErr=open(path.realpath('%s/logFile.err' % series), 'a')
+    logFileErr=open(os.path.realpath('%s/logFile.err' % series), 'a')
     
     # Run the file download, and verify file size
     while not curSize == int(totalSize):
@@ -78,7 +74,7 @@ def getPic(mod, series, chapter, page, picUrls,lastPage=1):
         up.close()
         del up, meta
         try:
-          os.remove(path.realpath('%s/%s/%s' % (series, chapter, pageName)))
+          os.remove(os.path.realpath('%s/%s/%s' % (series, chapter, pageName)))
         except Exception:
           pass
         
@@ -97,12 +93,12 @@ def getPic(mod, series, chapter, page, picUrls,lastPage=1):
       # Try, Except for any 404 errors or such
       try:
         buffer = up.read()
-        with open(path.realpath('%s/%s/%s' % (series, chapter, pageName)), 'wb') as f:
+        with open(os.path.realpath('%s/%s/%s' % (series, chapter, pageName)), 'wb') as f:
           f.write(buffer)
           f.close()
         
         # Get final size, and increment retries counter
-        curSize=os.path.getsize(path.realpath('%s/%s/%s' %
+        curSize=os.path.getsize(os.path.realpath('%s/%s/%s' %
                                 (series, chapter, pageName)))
         retries+=1
         
@@ -155,7 +151,7 @@ def getChap(series, chapter, mod):
     # Zip our chapter up, and remove the temp folder.
     zipIt('./%s/%s' % (series, chapter), '%s/%s' % (series, zipName),
           chapter)
-    shutil.rmtree(path.realpath('%s/%s' % (series, chapter)))
+    shutil.rmtree(os.path.realpath('%s/%s' % (series, chapter)))
     
 
 def getSeries(series, mod):
@@ -167,7 +163,7 @@ def getSeries(series, mod):
     # Let the user know what's going on, then flush stdout.
     sys.stdout.write('Looking up the index page for %s...\n' % series)
     sys.stdout.flush()
-    index = urllib2.urlopen('%s/%s' % (mod.site, series))
+    index = utilities.getUrl('%s/%s' % (mod.site, series))
     
     timeRun='%02d%02d%02d' % (holdTime.tm_year, holdTime.tm_mon, 
                               holdTime.tm_mday)
@@ -181,7 +177,7 @@ def getSeries(series, mod):
       if not buffer:
         break
       
-      # Perform a site-specific check, and parse.
+      # Site specific parse, based on module
       chap, chapHold = mod.parseChapters(buffer, series)
       
       if chap != '':
@@ -193,25 +189,8 @@ def getSeries(series, mod):
                      len(chaptrs))
     sys.stdout.flush()
     
-    # Compensate for len beginning at index value of 0. Start at the end of
-    # list, and chop off the endline special character.
-    threads = []
-    for i in range(1, len(chaptrs)+1):
-      chapter = str(chaptrs[len(chaptrs)-(i)]).rstrip('\n')
-      while threading.activeCount() > 4:
-        time.sleep(.25)
-      threads.append(threading.Thread(target=getChap, args=(series, chapter, mod)))
-      threads[-1].daemon = True
-      threads[-1].start()
-      time.sleep(.05)
-      
-    # Wait for the last thread to finish
-    for i in threads:
-      if i.isAlive:
-        i.join()
-    sys.stdout.write('Finished!!!... \nTook long enough, eh?\n')
-    sys.stdout.flush()
-    
+    argsPass = [series, mod]
+    utilities.threadIt(getChap, chaptrs, argsPass)
     if not CompleteStatus == None:
       if not CompleteStatus == ' ':
         with open(updateName, 'ab') as f:

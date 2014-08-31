@@ -1,15 +1,12 @@
-#!/usr/bin/python
-
 import re
-import sys
-import urllib2
-import utilities
+from .. import utilities
 
 site = "http://www.mangaeden.com/en-manga"
 tags = ['me', 'mangaEden', 'MangaEden']
 resultHeader = '***//////// MangaEden Search Results \\\\\\\\\\\\\\\\***'
 
 def getPages(series, chapter, chapterHold = None):
+    holdPage = None
     retries = 0
     while retries < 4:
       try:

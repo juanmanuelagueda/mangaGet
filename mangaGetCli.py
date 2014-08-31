@@ -69,14 +69,15 @@ if __name__ == '__main__':
       
   if not results.chap == None:
     if not results.seriesName == None:
+      sys.stdout.write('Starting on %s... \n' % results.seriesName)
       if '-' in results.chap:
         holdChaps = results.chap.split('-')
-        sys.stdout.write('Starting on %s... \n' % results.seriesName)
-        for i in range(int(holdChaps[0]), int(holdChaps[1])+1):
-          mangaGet.getChap(results.seriesName, str(i), mod)
-        sys.stdout.write('\nFinished!!! \n')
+        argsPass = [results.seriesName, mod]
+        chaptrs = range(int(holdChaps[0]), int(holdChaps[1])+1)
+        mangaGet.utilities.threadIt(mangaGet.getChap, chaptrs[::-1], argsPass)
       else:
         mangaGet.getChap(results.seriesName, results.chap, mod)
+        sys.stdout.write('\nFinished!!!')
     else:
       print 'Please provide a -s (series) with -c'
 

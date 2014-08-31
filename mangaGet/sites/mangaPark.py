@@ -1,9 +1,5 @@
-#!/usr/bin/python
-
 import re
-import sys
-import urllib2
-import utilities
+from .. import utilities
 
 site = 'http://www.mangapark.com/manga'
 tags = ['mp', 'mangaPark', 'MangaPark']
