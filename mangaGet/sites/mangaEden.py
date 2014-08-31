@@ -2,7 +2,9 @@ import re
 from .. import utilities
 
 site = "http://www.mangaeden.com/en-manga"
+hsite = "http://www.perveden.com/en-manga"
 tags = ['me', 'mangaEden', 'MangaEden']
+htags = ['pe', 'pervEden', 'PervEden']
 resultHeader = '***//////// MangaEden Search Results \\\\\\\\\\\\\\\\***'
 
 def getPages(series, chapter, chapterHold = None):

@@ -52,6 +52,11 @@ if __name__ == '__main__':
       for siteN in site.tags:
         if results.siteName == siteN:
           mod=site
+      if hasattr(site, 'htags'):
+        for siteN in site.htags:
+          if results.siteName == siteN:
+            mod = site
+            mod.site = mod.hsite
     if mod == None:
       print 'Your options are mangaPark, mp, mangaEden or me!!!'
       sys.exit(0)
@@ -87,10 +92,17 @@ if __name__ == '__main__':
       chaptrs, chapHold = mod.parseChapters(results.seriesName)
       passChap = []
       argsPass = [results.seriesName, mod]
-      for i in range(1, int(results.lastNum)+1):
+      sys.stdout.write('The %s latest chapters for %s are: ' % 
+                       (results.lastNum, results.seriesName))
+      for i in range(0, int(results.lastNum)):
+        if i < int(results.lastNum)-1:
+          sys.stdout.write('%s, ' % chaptrs[i])
+        else:
+          sys.stdout.write('%s. \n' % chaptrs[i])
         passChap.append(chaptrs[i])
       if results.lastNum == '1':
         mangaGet.getChap(results.seriesName, passChap[0], mod)
+        sys.stdout.write(' Finished!!!\n')
       else:
          mangaGet.utilities.threadIt(mangaGet.getChap, passChap, argsPass)
   elif not results.seriesName == None:
