@@ -48,17 +48,29 @@ def getPages(series, chapter, chapterHold = None):
     return len(finalPics), finalPics
 
 
-def parseChapters(buffer, series):
-    finalCut = ''
-    chapterHold = None
-    if '/manga/%s' % series in buffer:
-      if '/s1' in buffer:
-        if 'class' in buffer:
-          chapterHold = buffer
-          firstCut = re.sub('.*/c', '', buffer)
-          secondCut = re.sub('/1.*', '', firstCut)
-          finalCut = secondCut.replace('\n', '')
-    return finalCut, chapterHold
+def parseChapters(series):
+
+    global site
+    chaptrs = []
+    chaptrHold = []
+    index = utilities.getUrl('%s/%s' % (site, series))
+    # Enumerate the list of chapters for the series.
+    while True:
+      buffer = index.readline(8192)
+      if not buffer:
+        break
+      finalCut = ''
+      chapterHold = None
+      if '/manga/%s' % series in buffer:
+        if '/s1' in buffer:
+          if 'class' in buffer:
+            chaptrHold.append(buffer)
+            firstCut = re.sub('.*/c', '', buffer)
+            secondCut = re.sub('/1.*', '', firstCut)
+            finalCut = secondCut.replace('\n', '')
+      if finalCut != '':
+        chaptrs.append(finalCut)
+    return chaptrs, chaptrHold
 
 
 def searchSite(srchStr):
