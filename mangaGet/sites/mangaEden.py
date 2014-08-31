@@ -56,14 +56,25 @@ def getPicUrl(series, chapter, page, chapterHold = None):
     return picUrl
 
 
-def parseChapters(buffer, series):
-    firstCut = ''
-    finalCut = ''
-    if 'chapterLink' in buffer:
-      firstCut = re.sub('/1/".*', '', buffer)
-      secondCut = re.sub('.*/', '', firstCut)
-      finalCut = secondCut.replace('\n', '')
-    return finalCut, None
+def parseChapters(series):
+    global site
+    chaptrs = []
+    
+    index = utilities.getUrl('%s/%s' % (site, series))
+    # Enumerate the list of chapters for the series.
+    while True:
+      buffer = index.readline(8192)
+      if not buffer:
+        break
+      firstCut = ''
+      finalCut = ''
+      if 'chapterLink' in buffer:
+        firstCut = re.sub('/1/".*', '', buffer)
+        secondCut = re.sub('.*/', '', firstCut)
+        finalCut = secondCut.replace('\n', '')
+      if finalCut != '':
+        chaptrs.append(finalCut)
+    return chaptrs, None
 
 
 def searchSite(srchStr):

@@ -163,7 +163,7 @@ def getSeries(series, mod):
     # Let the user know what's going on, then flush stdout.
     sys.stdout.write('Looking up the index page for %s...\n' % series)
     sys.stdout.flush()
-    index = utilities.getUrl('%s/%s' % (mod.site, series))
+    # index = utilities.getUrl('%s/%s' % (mod.site, series))
     
     timeRun='%02d%02d%02d' % (holdTime.tm_year, holdTime.tm_mon, 
                               holdTime.tm_mday)
@@ -172,18 +172,18 @@ def getSeries(series, mod):
       CompleteStatus=' '
     
     # Enumerate the list of chapters for the series.
-    while True:
-      buffer = index.readline(8192)
-      if not buffer:
-        break
-      
-      # Site specific parse, based on module
-      chap, chapHold = mod.parseChapters(buffer, series)
-      
-      if chap != '':
-        chaptrs.append(chap)
-      if chapHold != None:
-        ChapterHold.append(chapHold)
+    #while True:
+    #  buffer = index.readline(8192)
+    #  if not buffer:
+    #    break
+    #  
+    #  # Site specific parse, based on module
+    chaptrs, ChapterHold = mod.parseChapters(series)
+    #  
+    #  if chap != '':
+    #    chaptrs.append(chap)
+    #  if chapHold != None:
+    #    ChapterHold.append(chapHold)
     
     sys.stdout.write('Chapter index found... %d chapters to get.\n' %
                      len(chaptrs))

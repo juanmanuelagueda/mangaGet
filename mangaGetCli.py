@@ -28,19 +28,21 @@ if __name__ == '__main__':
   
   parser=optparse.OptionParser('MangaGet Second Edition')
   
-  parser.add_option('-s', action='store', dest='seriesName',
-                    help='Specify a series name. Match the site.')
   parser.add_option('-c', action='store', dest='chap', 
                     help='Specify a chapter number.%s' % 
                     'For this, -s is a requirement.')
+  parser.add_option('-l', action='store', dest='lastNum',
+                    help='Download the latest given number of chapters')
+  parser.add_option('-s', action='store', dest='seriesName',
+                    help='Specify a series name. Match the site.')
   parser.add_option('--search', action='store', dest='search', 
                     help='Specify search keywords.')
-  parser.add_option('--sp', action='store_true', dest='searchPass',
-                    default=False, help='Pass search selection as series name.')
   parser.add_option('--site', action='store', dest='siteName', 
                     help='Specify a site name. %s %s' %
                     ('Valid options are:\n', tags))
- 
+  parser.add_option('--sp', action='store_true', dest='searchPass', default=False, 
+                    help='Pass search selection as series name.')
+   
   (results, args) = parser.parse_args()
   signal.signal(signal.SIGINT, sigIntHandler)
   
@@ -80,7 +82,17 @@ if __name__ == '__main__':
         sys.stdout.write('\nFinished!!!')
     else:
       print 'Please provide a -s (series) with -c'
-
+  elif not results.lastNum == None:
+    if not results.seriesName == None:
+      chaptrs, chapHold = mod.parseChapters(results.seriesName)
+      passChap = []
+      argsPass = [results.seriesName, mod]
+      for i in range(1, int(results.lastNum)+1):
+        passChap.append(chaptrs[i])
+      if results.lastNum == '1':
+        mangaGet.getChap(results.seriesName, passChap[0], mod)
+      else:
+         mangaGet.utilities.threadIt(mangaGet.getChap, passChap, argsPass)
   elif not results.seriesName == None:
     mangaGet.getSeries(results.seriesName, mod)
   else:
