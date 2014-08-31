@@ -1,11 +1,13 @@
 #!/usr/bin/python
 
 import re
-import urllib2
 import sys
+import urllib2
+import utilities
 
 site = 'http://www.mangapark.com/manga'
 tags = ['mp', 'mangaPark', 'MangaPark']
+resultHeader = '***//////// MangaPark Search Results \\\\\\\\\\\\\\\\***'
 
 def getPages(series, chapter, chapterHold = None):
     holdPics=[]
@@ -14,7 +16,7 @@ def getPages(series, chapter, chapterHold = None):
     
     # Check to see if ChapterHold alredy has what we need.
     if not chapterHold:
-      holdChap=urllib2.urlopen('%s/%s' % (site, series), timeout = 20.0)
+      holdChap=utilities.getUrl('%s/%s' % (site, series))
       
       while True:
         buffer=holdChap.readline(8192)
@@ -37,7 +39,7 @@ def getPages(series, chapter, chapterHold = None):
                 chapterUrl=re.sub('/1.*', '', firstCut)
     
     # Once we have the chapter's URL, lets open it.
-    holdPage=urllib2.urlopen('%s%s' % (site, chapterUrl))
+    holdPage=utilities.getUrl('%s%s' % (site, chapterUrl))
     
     # Loop through the chapter's URL line by like, parsing the pics out.
     while True:
@@ -63,15 +65,23 @@ def parseChapters(buffer, series):
     return finalCut, chapterHold
 
 
-def getUrl(url, retries=0):
-    # Attempt getting the URL object, retry up to four times.
-    while retries < 4:
-      try:
-        hold=urllib2.urlopen(url)
-        return hold
-      except Exception:
-        print 'Error opening the URL. Retrying...'
-        retries+=1
-        print retries
-
-
+def searchSite(srchStr):
+    url = 'http://www.mangapark.com/search?q=%s' % srchStr
+    urlHold = utilities.getUrl(url)
+    title = ['']
+    urlRoot = ['']
+    while True:
+      buffer = urlHold.readline()
+      
+      if not buffer:
+        break
+  
+      if '/manga/' in buffer:
+        if 'cover' in buffer:
+          firstCut = re.sub('.*/manga/', '', buffer)
+          secondCut = re.sub('">', '', firstCut)
+          urlRootHold, titleHold = re.split('".*"', secondCut)
+          
+          urlRoot.append(urlRootHold)
+          title.append(titleHold.replace('\n', ''))
+    return title, urlRoot

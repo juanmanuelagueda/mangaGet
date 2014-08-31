@@ -70,8 +70,8 @@ def parseChapters(buffer, series):
 
 
 def searchSite(srchStr):
-    url='http://www.mangaeden.com/en-directory/?title=%s' % srchStr
-    urlHold = urllib2.urlopen(url)
+    url = 'http://www.mangaeden.com/en-directory/?title=%s' % srchStr
+    urlHold = utilities.getUrl(url)
     title = ['']
     urlRoot = ['']
     while True:
