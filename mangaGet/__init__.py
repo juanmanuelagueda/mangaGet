@@ -20,19 +20,17 @@ import optparse
 import importlib
 import threading
 
+from sites import utilities
 from os import path
 
 ChapterHold = []
 CompleteStatus = None
-FullLine = 1
 Mods = []
 
-PervEden = 'http://www.perveden.com/en-manga'
 
 def getPic(mod, series, chapter, page, picUrls,lastPage=1):
     
     # List of variables for this method
-    global FullLine
     pageName='%02d.jpg' % int(page)
     holdTime=time.localtime()
     retries=0
@@ -54,7 +52,7 @@ def getPic(mod, series, chapter, page, picUrls,lastPage=1):
     if not os.path.exists('%s/%s' % (series, chapter)):
       os.mkdir(path.realpath('%s/%s' % (series, chapter)))
     
-    up=getUrl(picUrl)
+    up=utilities.getUrl(picUrl)
     meta=up.info()
     totalSize= meta.getheader('content-length')
     
@@ -92,7 +90,7 @@ def getPic(mod, series, chapter, page, picUrls,lastPage=1):
                          holdTime.tm_min, holdTime.tm_sec))
         logFileErr.flush()
         
-        up=getUrl(picUrl)
+        up=utilities.getUrl(picUrl)
         meta=up.info()
         totalSize=meta.getheader('content-length')
       
@@ -122,7 +120,6 @@ def getPic(mod, series, chapter, page, picUrls,lastPage=1):
 
 
 def getChap(series, chapter, mod):
-    global FullLine
     global CompleteStatus
     
     # Piece together the name for the chapter
@@ -135,10 +132,10 @@ def getChap(series, chapter, mod):
     
     # Give the user some kind of status...
     if os.path.exists(os.path.realpath('./%s/%s' % (series, zipName))):
-      statusPrint('Chapter %s found!!!... ' % chapName)
+      utilities.statusPrint('Chapter %s found!!!... ' % chapName)
       return False
     else:
-      statusPrint('Starting on chapter %s... ' % chapName)
+      utilities.statusPrint('Starting on chapter %s... ' % chapName)
       if CompleteStatus == None:
         statusStarter='For today, as have the following to read!'
         CompleteStatus='%s\nDownloaded %s Chapter %s' % (statusStarter, 
@@ -232,17 +229,6 @@ def zipIt(path, name, top):
     zip.close()
 
 
-def getUrl(url, retries=0):
-    # Attempt getting the URL object, retry up to four times.
-    while retries < 4:
-      try:
-        hold=urllib2.urlopen(url, timeout=20.0)
-        return hold
-      except Exception:
-        retries+=1
-        print 'Error opening the URL. Retrying(%d)...' % retries
-
-
 def searchMod(mod, srchStr):
     srchTitle, srchUrl = mod.searchSite(srchStr)
     sys.stdout.write('%s \n' % mod.resultHeader)
@@ -257,29 +243,12 @@ def searchMod(mod, srchStr):
       sys.stdout.write('Invalid Entry. Exiting... \n')
 
 
-def statusPrint(message):
-    global FullLine
-    if FullLine > 3:
-      FullLine = 1
-      sys.stdout.write('%s\n' % message)
-      sys.stdout.flush()
-    else:
-      FullLine += 1
-      sys.stdout.write(message)
-      sys.stdout.flush()
-
-
 def importer():
     modList = ['mangaGet.sites.%s' % re.sub(r'\.py', '', f) for f in os.listdir('%s/%s' % 
-                (os.path.dirname(__file__), "sites")) if f.endswith('.py') and f != '__init__.py']
+                (os.path.dirname(__file__), "sites")) if f.endswith('.py') and 
+                 f != '__init__.py' and f != 'utilities.py' ]
     for i in modList:
       Mods.append(importlib.import_module(i)) 
-
-
-def sigIntHandler(signal, frame):
-    # Catch all the CTRL+C
-    print '  SigInt Caught, Terminating...'
-    sys.exit(0)
 
    
 importer()

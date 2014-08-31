@@ -3,6 +3,7 @@
 import re
 import sys
 import urllib2
+import utilities
 
 site = "http://www.mangaeden.com/en-manga"
 tags = ['me', 'mangaEden', 'MangaEden']
@@ -12,7 +13,7 @@ def getPages(series, chapter, chapterHold = None):
     retries = 0
     while retries < 4:
       try:
-        holdPage=urllib2.urlopen('%s/%s/%s/1' % (site, series, chapter), timeout = 20.0)
+        holdPage=utilities.getUrl('%s/%s/%s/1' % (site, series, chapter))
       except Exception:
         retries += 1
         print 'Error getting the url for chapter %s pagelist...' % chapter
@@ -40,7 +41,7 @@ def getPages(series, chapter, chapterHold = None):
 
 def getPicUrl(series, chapter, page, chapterHold = None):
     url='%s/%s/%s/%s' % (site,series,chapter,page)
-    buf=getUrl(url)
+    buf=utilities.getUrl(url)
     holdPic=''
     
     # Read the HTML, grabbing the line we need.
@@ -56,18 +57,6 @@ def getPicUrl(series, chapter, page, chapterHold = None):
     picUrl='http:%s' % re.sub('" alt=.*', '', firstCut)
     
     return picUrl
-
-
-def getUrl(url, retries=0):
-    # Attempt getting the URL object, retry up to four times.
-    while retries < 4:
-      try:
-        hold=urllib2.urlopen(url, timeout=20.0)
-        return hold
-      except Exception:
-        print 'Error opening the URL. Retrying...'
-        retries+=1
-        print retries
 
 
 def parseChapters(buffer, series):
