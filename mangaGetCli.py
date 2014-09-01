@@ -19,9 +19,14 @@ if __name__ == '__main__':
   for site in mangaGet.Mods:
     if tags != '':
       tags += ' or '
+    numIn = 0
     for tag in site.tags:
       if tags == '':
         tags += tag
+        numIn += 1
+      elif numIn <= 0:
+        tags = '%s %s' % (tags, tag)
+        numIn += 1
       else:
         tags = '%s, %s' % (tags, tag)
   
