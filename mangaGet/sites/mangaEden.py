@@ -15,7 +15,7 @@ def getPages(series, chapter, chapterHold = None):
         holdPage=utilities.getUrl('%s/%s/%s/1' % (site, series, chapter))
       except Exception:
         retries += 1
-        print 'Error getting the url for chapter %s pagelist...' % chapter
+        sys.stdout.write('Error getting the url for chapter %s pagelist...\n' % chapter)
         continue
       break
     

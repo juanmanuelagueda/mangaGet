@@ -9,12 +9,8 @@ import re
 import sys
 import time
 
-import socket
 import shutil
-import urllib2
 import zipfile
-
-import optparse
 import importlib
 import threading
 

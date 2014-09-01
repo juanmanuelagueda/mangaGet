@@ -84,7 +84,7 @@ if __name__ == '__main__':
         mangaGet.utilities.threadIt(mangaGet.getChap, chaptrs[::-1], argsPass)
       else:
         mangaGet.getChap(results.seriesName, results.chap, mod)
-        sys.stdout.write('\nFinished!!!')
+        sys.stdout.write('\nFinished!!!\n')
     else:
       print 'Please provide a -s (series) with -c'
   elif not results.lastNum == None:

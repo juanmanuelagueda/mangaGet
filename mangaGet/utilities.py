@@ -9,12 +9,13 @@ def getUrl(url, retries=0):
     # Attempt getting the URL object, retry up to four times.
     while retries < 4:
       try:
-        hold=urllib2.urlopen(url, timeout=20.0)
+        opener = urllib2.build_opener()
+        opener.addheaders = [('User-agent', 'Mozilla/5.0')]
+        hold=opener.open(url, timeout=20.0)
         return hold
       except Exception:
         retries+=1
-        print url
-        print 'Error opening the URL. Retrying(%d)...' % retries
+        sys.stdout.write('Error opening the URL. Retrying(%d)...\n' % retries)
 
 
 def statusPrint(message):
@@ -53,7 +54,7 @@ def threadIt(meth, chaptrs, args):
 
 def sigIntHandler(signal, frame):
     # Catch all the CTRL+C
-    print '  SigInt Caught, Terminating...'
+    sys.stdout.write( '  SigInt Caught, Terminating...\n')
     sys.exit(0)
 
 
