@@ -5,7 +5,7 @@ import sys
 
 FullLine = 1
 
-def getUrl(url, retries=0):
+def getUrl(url, series = '', retries=0):
     # Attempt getting the URL object, retry up to four times.
     while retries < 4:
       try:
@@ -15,7 +15,8 @@ def getUrl(url, retries=0):
         return hold
       except Exception:
         retries+=1
-        sys.stdout.write('Error opening the URL. Retrying(%d)...\n' % retries)
+        errMsg = 'Error opening the URL. Retrying(%d)...\n' % retries
+        errorWrite(errMsg, series)
 
 
 def statusPrint(message):
@@ -50,7 +51,25 @@ def threadIt(meth, chaptrs, args):
         i.join()
     sys.stdout.write('Finished!!!... \nTook long enough, eh?\n')
     sys.stdout.flush()
- 
+
+
+def safeRead(urlHold, series, chap = None):
+    retries = 0
+    while retries < 4:
+      try:
+        buff = urlHold.readline()
+        return buff
+      except Exception:
+        retries += 1
+        msg = 'Error reading from the url stream. (%s) Retrying(%d)...' % (str(chap), retries)
+        errorWrite(msg, series)
+
+
+def errorWrite(msg, series):
+    with open(os.path.realpath('%s/logFile.err' % series), 'a') as logFileErr:
+      logFileErr.write(msg)
+      logFileErr.flush()
+      logFileErr.close()
 
 def sigIntHandler(signal, frame):
     # Catch all the CTRL+C

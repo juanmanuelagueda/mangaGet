@@ -7,13 +7,13 @@ resultHeader = '***//////// MangaPanda Search Results \\\\\\\\\\\\\\\\***'
 
 
 def getPicUrl(series, chapter, page, chapterHold = None):
-    url='%s/%s/%s/%s' % (site,series,chapter,page)
-    buf=utilities.getUrl(url)
+    url = '%s/%s/%s/%s' % (site,series,chapter,page)
+    picUrl = utilities.getUrl(url, series)
     holdPic=''
     
     # Read the HTML, grabbing the line we need.
     while True:
-      buffer=buf.readline(1024)
+      buffer = utilities.safeRead(picUrl, series)
       if not buffer:
         break
       if 'img id="img"' in buffer:
@@ -27,12 +27,12 @@ def getPicUrl(series, chapter, page, chapterHold = None):
 
 
 def getPages(series, chapter, chapterHold = None):
-    holdPage = None
+    chapUrl = None
     pageHold = []
     retries = 0
     while retries < 4:
       try:
-        holdPage=utilities.getUrl('%s/%s/%s/1' % (site, series, chapter))
+        chapUrl=utilities.getUrl('%s/%s/%s/1' % (site, series, chapter))
       except Exception:
         retries += 1
         sys.stdout.write('Error getting the url for chapter %s pagelist...\n' % chapter)
@@ -41,7 +41,7 @@ def getPages(series, chapter, chapterHold = None):
     
     # Read the html line by line, looking the the one we need.
     while True:
-      buffer=holdPage.readline(8192)
+      buffer = utilities.safeRead(chapUrl, series)
       if not buffer:
         break
       if 'option value' in buffer:
@@ -60,10 +60,10 @@ def parseChapters(series):
     chaptrs = []
     startCount = 0
     
-    index = utilities.getUrl('%s/%s' % (site, series))
+    seriesUrl = utilities.getUrl('%s/%s' % (site, series), series)
     # Enumerate the list of chapters for the series.
     while True:
-      buffer = index.readline(8192)
+      buffer = utilities.safeRead(seriesUrl, series)
       if not buffer:
         break
       firstCut = ''
@@ -86,13 +86,13 @@ def parseChapters(series):
 
 def searchSite(srchStr):
     url = 'http://www.mangapanda.com/search/?w=%s' % srchStr
-    urlHold = utilities.getUrl(url)
+    searchUrl = utilities.getUrl(url, '.')
     title = ['']
     urlRoot = ['']
     searchStart = 0
     
     while True:
-      buffer = urlHold.readline()
+      buffer = utilities.safeRead(searchUrl, '.')
       
       if not buffer:
         break

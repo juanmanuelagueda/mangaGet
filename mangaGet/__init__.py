@@ -44,7 +44,7 @@ def getPic(mod, series, chapter, page, picUrls,lastPage=1):
     if not os.path.exists('%s/%s' % (series, chapter)):
       os.mkdir(os.path.realpath('%s/%s' % (series, chapter)))
     
-    up=utilities.getUrl(picUrl)
+    up=utilities.getUrl(picUrl, series)
     meta=up.info()
     totalSize= meta.getheader('content-length')
     
@@ -55,7 +55,7 @@ def getPic(mod, series, chapter, page, picUrls,lastPage=1):
                    holdTime.tm_min, holdTime.tm_sec))
     logFile.flush()
     
-    logFileErr=open(os.path.realpath('%s/logFile.err' % series), 'a')
+    # logFileErr=open(os.path.realpath('%s/logFile.err' % series), 'a')
     
     # Run the file download, and verify file size
     while not curSize == int(totalSize):
@@ -76,13 +76,13 @@ def getPic(mod, series, chapter, page, picUrls,lastPage=1):
         
         # Re-open the URL, re-grab the headers, and let the user know 
         # what happened
-        errMsg = 'Something\'s wrong with the filesize. Retrying...'
-        logFileErr.write("Chapter: %s Page: %s (%s) Current Time: %02d:%02d:%02d  \n" %
+        err = 'Something\'s wrong with the filesize. Retrying...'
+        errMsg = 'Chapter: %s Page: %s (%s) Current Time: %02d:%02d:%02d  \n' %
                         (chapter, page, errMsg,holdTime.tm_hour, 
-                         holdTime.tm_min, holdTime.tm_sec))
-        logFileErr.flush()
+                         holdTime.tm_min, holdTime.tm_sec)
+        utilities.errorWrite(errMsg, series)
         
-        up=utilities.getUrl(picUrl)
+        up=utilities.getUrl(picUrl, series)
         meta=up.info()
         totalSize=meta.getheader('content-length')
       
@@ -99,11 +99,11 @@ def getPic(mod, series, chapter, page, picUrls,lastPage=1):
         retries+=1
         
       except Exception:
-        errMsg = 'Error while reading the pic from the URL. Retrying...'
-        logFileErr.write("Chapter: %s Page: %s (%s) Current Time: %02d:%02d:%02d  \n" %
+        err = 'Error while reading the pic from the URL. Retrying...'
+        errMsg = 'Chapter: %s Page: %s (%s) Current Time: %02d:%02d:%02d  \n' %
                         (chapter, page, errMsg,holdTime.tm_hour, 
-                         holdTime.tm_min, holdTime.tm_sec))
-        logFileErr.flush()
+                         holdTime.tm_min, holdTime.tm_sec)
+        utilities.errorWrite(errMsg, series)
         retries+=1
     
     # Close out the log... Did it work?
@@ -159,7 +159,6 @@ def getSeries(series, mod):
     # Let the user know what's going on, then flush stdout.
     sys.stdout.write('Looking up the index page for %s...\n' % series)
     sys.stdout.flush()
-    # index = utilities.getUrl('%s/%s' % (mod.site, series))
     
     timeRun='%02d%02d%02d' % (holdTime.tm_year, holdTime.tm_mon, 
                               holdTime.tm_mday)
@@ -167,20 +166,7 @@ def getSeries(series, mod):
     if os.path.exists(os.path.realpath(updateName)):
       CompleteStatus=' '
     
-    # Enumerate the list of chapters for the series.
-    #while True:
-    #  buffer = index.readline(8192)
-    #  if not buffer:
-    #    break
-    #  
-    #  # Site specific parse, based on module
     chaptrs, ChapterHold = mod.parseChapters(series)
-    #  
-    #  if chap != '':
-    #    chaptrs.append(chap)
-    #  if chapHold != None:
-    #    ChapterHold.append(chapHold)
-    
     sys.stdout.write('Chapter index found... %d chapters to get.\n' %
                      len(chaptrs))
     sys.stdout.flush()

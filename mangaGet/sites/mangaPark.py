@@ -6,16 +6,16 @@ tags = ['mp', 'mangaPark', 'MangaPark']
 resultHeader = '***//////// MangaPark Search Results \\\\\\\\\\\\\\\\***'
 
 def getPages(series, chapter, chapterHold = None):
-    holdPics=[]
-    finalPics=[]
-    chapterUrl=''
+    holdPics = []
+    finalPics = []
+    chapterUrl = ''
     
     # Check to see if ChapterHold alredy has what we need.
     if not chapterHold:
-      holdChap=utilities.getUrl('%s/%s' % (site, series))
+      chapUrl = utilities.getUrl('%s/%s' % (site, series), series)
       
       while True:
-        buffer=holdChap.readline(8192)
+        buffer = utilities.safeRead(chapUrl, series)
         if not buffer: 
           break
         if '/%s/s1/' % series in buffer:
@@ -31,32 +31,32 @@ def getPages(series, chapter, chapterHold = None):
           for splitIt in lines.split('</a>'):
             if '/c%s/' % chapter in splitIt:
               if 'class' in splitIt:
-                firstCut=re.sub('.*manga', '', splitIt)
-                chapterUrl=re.sub('/1.*', '', firstCut)
+                firstCut = re.sub('.*manga', '', splitIt)
+                chapterUrl = re.sub('/1.*', '', firstCut)
     
     # Once we have the chapter's URL, lets open it.
-    holdPage=utilities.getUrl('%s%s' % (site, chapterUrl))
+    pageUrl = utilities.getUrl('%s%s' % (site, chapterUrl), series)
     
     # Loop through the chapter's URL line by like, parsing the pics out.
     while True:
-      buffer=holdPage.readline(8192)
+      buffer = utilities.safeRead(pageUrl, series)
       if not buffer:
         break
       if 'a target="_blank' in buffer:
-        firstCut=re.sub('.*href..', '', buffer)
+        firstCut = re.sub('.*href..', '', buffer)
         finalPics.append(re.sub('" .*', '', firstCut))
     return len(finalPics), finalPics
 
 
 def parseChapters(series):
-
     global site
     chaptrs = []
     chaptrHold = []
-    index = utilities.getUrl('%s/%s' % (site, series))
+    chapUrl = utilities.getUrl('%s/%s' % (site, series), series)
+    
     # Enumerate the list of chapters for the series.
     while True:
-      buffer = index.readline(8192)
+      buffer = utilities.safeRead(chapUrl, series)
       if not buffer:
         break
       finalCut = ''
@@ -74,12 +74,14 @@ def parseChapters(series):
 
 
 def searchSite(srchStr):
-    url = 'http://www.mangapark.com/search?q=%s' % srchStr
-    urlHold = utilities.getUrl(url)
     title = ['']
     urlRoot = ['']
+    
+    url = 'http://www.mangapark.com/search?q=%s' % srchStr
+    urlHold = utilities.getUrl(url)
+    
     while True:
-      buffer = urlHold.readline()
+      buffer = utilities.safeRead(urlhold, '.')
       
       if not buffer:
         break
