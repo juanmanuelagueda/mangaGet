@@ -64,10 +64,10 @@ def parseChapters(series):
     global site
     chaptrs = []
     
-    chapUrl = utilities.getUrl('%s/%s' % (site, series), series)
+    seriesUrl = utilities.getUrl('%s/%s' % (site, series), series)
     # Enumerate the list of chapters for the series.
     while True:
-      buffer = utilities.safeRead(chapUrl, series)
+      buffer = utilities.safeRead(seriesUrl, series)
       if not buffer:
         break
       firstCut = ''

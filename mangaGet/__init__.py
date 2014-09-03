@@ -1,9 +1,3 @@
-"""
-Author: DarkDragn
-Date:   28Aug14 
-"""
-
-
 import os
 import re
 import sys
@@ -23,10 +17,10 @@ Mods = []
 def getPic(mod, series, chapter, page, picUrls,lastPage=1):
     
     # List of variables for this method
-    pageName='%02d.jpg' % int(page)
-    holdTime=time.localtime()
-    retries=0
-    curSize=0
+    pageName = '%02d.jpg' % int(page)
+    holdTime = time.localtime()
+    retries = 0
+    curSize = 0
     
     # Check to see if we have this page...
     if os.path.exists(os.path.realpath('./%s/%s/%s' %
@@ -44,12 +38,12 @@ def getPic(mod, series, chapter, page, picUrls,lastPage=1):
     if not os.path.exists('%s/%s' % (series, chapter)):
       os.mkdir(os.path.realpath('%s/%s' % (series, chapter)))
     
-    up=utilities.getUrl(picUrl, series)
-    meta=up.info()
-    totalSize= meta.getheader('content-length')
+    up = utilities.getUrl(picUrl, series)
+    meta = up.info()
+    totalSize = meta.getheader('content-length')
     
     # Make a status entry for the log
-    logFile=open(os.path.realpath('%s/%s/logFile' % (series, chapter)), 'a')
+    logFile = open(os.path.realpath('%s/%s/logFile' % (series, chapter)), 'a')
     logFile.write("File Number %02d/%02d  Current Time: %02d:%02d:%02d  " %
                   (int(page), int(lastPage), holdTime.tm_hour, 
                    holdTime.tm_min, holdTime.tm_sec))
@@ -77,14 +71,14 @@ def getPic(mod, series, chapter, page, picUrls,lastPage=1):
         # Re-open the URL, re-grab the headers, and let the user know 
         # what happened
         err = 'Something\'s wrong with the filesize. Retrying...'
-        errMsg = 'Chapter: %s Page: %s (%s) Current Time: %02d:%02d:%02d  \n' %
-                        (chapter, page, errMsg,holdTime.tm_hour, 
-                         holdTime.tm_min, holdTime.tm_sec)
+        errMsg = ('Chapter: %s Page: %s (%s) Current Time: %02d:%02d:%02d  \n' %
+                  (chapter, page, err, holdTime.tm_hour, holdTime.tm_min, 
+                   holdTime.tm_sec))
         utilities.errorWrite(errMsg, series)
         
-        up=utilities.getUrl(picUrl, series)
-        meta=up.info()
-        totalSize=meta.getheader('content-length')
+        up = utilities.getUrl(picUrl, series)
+        meta = up.info()
+        totalSize = meta.getheader('content-length')
       
       # Try, Except for any 404 errors or such
       try:
@@ -94,17 +88,17 @@ def getPic(mod, series, chapter, page, picUrls,lastPage=1):
           f.close()
         
         # Get final size, and increment retries counter
-        curSize=os.path.getsize(os.path.realpath('%s/%s/%s' %
+        curSize = os.path.getsize(os.path.realpath('%s/%s/%s' %
                                 (series, chapter, pageName)))
-        retries+=1
+        retries += 1
         
       except Exception:
         err = 'Error while reading the pic from the URL. Retrying...'
-        errMsg = 'Chapter: %s Page: %s (%s) Current Time: %02d:%02d:%02d  \n' %
-                        (chapter, page, errMsg,holdTime.tm_hour, 
-                         holdTime.tm_min, holdTime.tm_sec)
+        errMsg = ('Chapter: %s Page: %s (%s) Current Time: %02d:%02d:%02d  \n' %
+                  (chapter, page, err, holdTime.tm_hour, 
+                   holdTime.tm_min, holdTime.tm_sec))
         utilities.errorWrite(errMsg, series)
-        retries+=1
+        retries += 1
     
     # Close out the log... Did it work?
     logFile.write('Success!\n')
@@ -116,11 +110,11 @@ def getChap(series, chapter, mod):
     
     # Piece together the name for the chapter
     if '.' in chapter:
-      name=chapter.split('.')
-      chapName='%03d.%s' % (int(name[0]), name[1])
+      name = chapter.split('.')
+      chapName = '%03d.%s' % (int(name[0]), name[1])
     else:
-      chapName='%03d' % (int(chapter))
-    zipName='%s.cbz' % chapName
+      chapName = '%03d' % (int(chapter))
+    zipName = '%s.cbz' % chapName
     
     # Give the user some kind of status...
     if os.path.exists(os.path.realpath('./%s/%s' % (series, zipName))):
@@ -129,12 +123,12 @@ def getChap(series, chapter, mod):
     else:
       utilities.statusPrint('Starting on chapter %s... ' % chapName)
       if CompleteStatus == None:
-        statusStarter='For today, as have the following to read!'
-        CompleteStatus='%s\nDownloaded %s Chapter %s' % (statusStarter, 
-                                                         series, chapter)
+        statusStarter = 'For today, as have the following to read!'
+        CompleteStatus = '%s\nDownloaded %s Chapter %s' % (statusStarter, 
+                                                           series, chapter)
       else:
-        CompleteStatus='%s\nDownloaded %s Chapter %s' % (CompleteStatus, 
-                                                         series, chapter)
+        CompleteStatus = '%s\nDownloaded %s Chapter %s' % (CompleteStatus, 
+                                                           series, chapter)
  
     
     # Check for which site we're using. Parse pages for site-specifiy ref.
@@ -154,15 +148,15 @@ def getSeries(series, mod):
     global CompleteStatus
     global ChapterHold
     chaptrs = []
-    holdTime=time.localtime()
+    holdTime = time.localtime()
     
     # Let the user know what's going on, then flush stdout.
     sys.stdout.write('Looking up the index page for %s...\n' % series)
     sys.stdout.flush()
     
-    timeRun='%02d%02d%02d' % (holdTime.tm_year, holdTime.tm_mon, 
+    timeRun = '%02d%02d%02d' % (holdTime.tm_year, holdTime.tm_mon, 
                               holdTime.tm_mday)
-    updateName='update.%s' % timeRun
+    updateName = 'update.%s' % timeRun
     if os.path.exists(os.path.realpath(updateName)):
       CompleteStatus=' '
     
@@ -183,7 +177,7 @@ def getSeries(series, mod):
 
 def zipIt(path, name, top):
     # Walk an entire directory, recursively creating a zip.
-    zip=zipfile.ZipFile(name, 'w', zipfile.ZIP_DEFLATED)
+    zip = zipfile.ZipFile(name, 'w', zipfile.ZIP_DEFLATED)
     for root, dirs, files in os.walk(path):
       for file in files:
         zip.write(os.path.join(root, file), '%s/%s' % (top, file))
