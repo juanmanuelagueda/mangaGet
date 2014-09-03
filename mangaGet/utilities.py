@@ -6,18 +6,23 @@ import urllib2
 
 FullLine = 1
 
-def getUrl(url, series = '', retries=0):
+def getUrl(url, series = '', retries=0, extras = None):
     # Attempt getting the URL object, retry up to four times.
     while retries < 4:
-      try:
-        opener = urllib2.build_opener()
-        opener.addheaders = [('User-agent', 'Mozilla/5.0')]
-        hold=opener.open(url, timeout=20.0)
-        return hold
-      except Exception:
-        retries+=1
-        errMsg = 'Error opening the URL. Retrying(%d)...\n' % retries
-        errorWrite(errMsg, series)
+        try:
+            opener = urllib2.build_opener()
+            opener.addheaders = [('User-agent', 'Mozilla/5.0')]
+            hold=opener.open(url, timeout=20.0)
+            return hold
+        except Exception:
+            retries+=1
+            errMsg = 'Error opening the URL. Retrying(%d)...\n' % retries
+            if extras != None:
+                errExtra = ['Chapter: %s' % extra[0]]
+                if extras[1] != None:
+                    errExtra.append('Page: %s' % extras[1])
+                errMsg = '; '.join(errExtra[:]) + errMsg
+            errorWrite(errMsg, series)
 
 
 def statusPrint(message):
