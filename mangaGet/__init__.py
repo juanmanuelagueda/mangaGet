@@ -8,6 +8,7 @@ import zipfile
 import importlib
 import threading
 
+import sites
 
 ChapterHold = []
 CompleteStatus = None
@@ -199,11 +200,10 @@ def searchMod(mod, srchStr):
 
 
 def importer():
-    modList = ['mangaGet.sites.%s' % re.sub(r'\.py', '', f) for f in os.listdir('%s/%s' % 
-                (os.path.dirname(__file__), "sites")) if f.endswith('.py') and 
-                 f != '__init__.py' and f != 'utilities.py' ]
-    for i in modList:
-      Mods.append(importlib.import_module(i)) 
+    modNames = ['mangaGet.sites.%s' % f for f in sites.__all__]
+    mods = map(importlib.import_module, modNames)
+    return mods
 
-   
-importer()
+
+if __name__ == 'mangaGet':
+    Mods = importer()

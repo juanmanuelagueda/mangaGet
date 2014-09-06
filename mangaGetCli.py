@@ -5,8 +5,6 @@ import optparse
 import signal
 import sys
 
-tags = ''
-searched = False
 
 def sigIntHandler(signal, frame):
     # Catch all the CTRL+C
@@ -16,6 +14,7 @@ def sigIntHandler(signal, frame):
 
 if __name__ == '__main__':
     tags = []
+    searched = False
     for site in mangaGet.Mods:
         for tagHold in list((', '.join(site.tags[:]), 'or')):
             tags.append(tagHold)
@@ -43,23 +42,20 @@ if __name__ == '__main__':
     mod = None
     if not results.siteName == None:
       for site in mangaGet.Mods:
-        for siteN in site.tags:
-          if results.siteName == siteN:
+          if results.siteName in site.tags:
             mod=site
-        if hasattr(site, 'htags'):
-          for siteN in site.htags:
-            if results.siteName == siteN:
-              mod = site
-              mod.site = mod.hsite
+          if hasattr(site, 'htags'):
+           if results.siteName in site.htags:
+                mod = site
+                mod.site = mod.hsite
       if mod == None:
         print 'Your options are mangaPark, mp, mangaEden or me!!!'
         sys.exit(0)
     else:
       for site in mangaGet.Mods:
-        for siteN in site.tags:
-          if 'me' == siteN:
-            mod=site
-            
+        if 'me' in site.tags:
+          mod=site
+          
     if not results.search == None:
       results.seriesName = mangaGet.searchMod(mod, results.search)
       searched = True
