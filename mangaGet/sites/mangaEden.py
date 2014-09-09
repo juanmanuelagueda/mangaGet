@@ -20,7 +20,7 @@ def getPages(series, chapter, chapterHold = None):
     chapUrl = utilities.getUrl('%s/%s/%s/1' % (site, series, chapter), series)
     pageCompile=re.compile('(?P<pageNum>[0-9]*)</a><a class="ui-state-default"')
     
-    return pageCompile.findall(chapUrl.read())[-1], []
+    return int(pageCompile.findall(chapUrl.read())[-1]), []
 
 
 def parseChapters(series):
