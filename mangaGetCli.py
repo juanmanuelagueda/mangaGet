@@ -1,16 +1,11 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 import mangaGet
 import optparse
 import signal
 import sys
 
-
-def sigIntHandler(signal, frame):
-    # Catch all the CTRL+C
-    print '  SigInt Caught, Terminating...'
-    sys.exit(0)
-
+from mangaGet.utilities import sigIntHandler
 
 if __name__ == '__main__':
     tags = []
@@ -49,7 +44,7 @@ if __name__ == '__main__':
                 mod = site
                 mod.site = mod.hsite
       if mod == None:
-        print 'Your options are mangaPark, mp, mangaEden or me!!!'
+        sys.stdout.write('Your options are mangaPark, mp, mangaEden or me!!!\n')
         sys.exit(0)
     else:
       for site in mangaGet.Mods:
@@ -76,7 +71,7 @@ if __name__ == '__main__':
           mangaGet.getChap(results.seriesName, results.chap, mod)
           sys.stdout.write('\nFinished!!!\n')
       else:
-        print 'Please provide a -s (series) with -c'
+        sys.stdout.write('Please provide a -s (series) with -c\n')
     elif not results.lastNum == None:
       if not results.seriesName == None:
         chaptrs, chapHold = mod.parseChapters(results.seriesName)

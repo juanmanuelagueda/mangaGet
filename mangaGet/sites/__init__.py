@@ -1,4 +1,4 @@
 import re
 import sys
 
-__all__ = ['mangaEden', 'mangaPark']
+__all__ = ['mangaEden', 'mangaPark', 'mangaPanda']

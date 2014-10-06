@@ -1,10 +1,18 @@
 import os
+import signal
 import sys
 import threading
+
 import time
 import urllib2
 
 FullLine = 1
+
+def errorWrite(msg, series):
+    with open(os.path.realpath('%s/logFile.err' % series), 'a') as logFileErr:
+      logFileErr.write(msg)
+      logFileErr.flush()
+      logFileErr.close()
 
 def getUrl(url, series = '', retries=0, extras = None):
     # Attempt getting the URL object, retry up to four times.
@@ -24,6 +32,21 @@ def getUrl(url, series = '', retries=0, extras = None):
                 errMsg = '; '.join(errExtra[:]) + errMsg
             errorWrite(errMsg, series)
 
+def safeRead(urlHold, series, chap = None):
+    retries = 0
+    while retries < 4:
+      try:
+        buff = urlHold.readline()
+        return buff
+      except Exception:
+        retries += 1
+        msg = 'Error reading from the url stream. (%s) Retrying(%d)...' % (str(chap), retries)
+        errorWrite(msg, series)
+
+def sigIntHandler(signal, frame):
+    # Catch all the CTRL+C
+    sys.stdout.write( '  SigInt Caught, Terminating...\n')
+    sys.exit(0)
 
 def statusPrint(message):
     global FullLine
@@ -36,12 +59,10 @@ def statusPrint(message):
       sys.stdout.write(message)
       sys.stdout.flush()
 
-
 def threadIt(meth, chaptrs, args):
     # Compensate for len beginning at index value of 0. Start at the end of
     # list, and chop off the endline special character.
     threads = []
-    
     for i in range(1, len(chaptrs)+1):
       chapter = str(chaptrs[len(chaptrs)-(i)]).rstrip('\n')
       while threading.activeCount() > 4:
@@ -50,36 +71,9 @@ def threadIt(meth, chaptrs, args):
       threads[-1].daemon = True
       threads[-1].start()
       time.sleep(.05)
-      
     # Wait for the last thread to finish
     for i in threads:
       if i.isAlive:
         i.join()
     sys.stdout.write('Finished!!!... \nTook long enough, eh?\n')
     sys.stdout.flush()
-
-
-def safeRead(urlHold, series, chap = None):
-    retries = 0
-    while retries < 4:
-      try:
-        buff = urlHold.readline()
-        return buff
-      except Exception:
-        retries += 1
-        msg = 'Error reading from the url stream. (%s) Retrying(%d)...' % (str(chap), retries)
-        errorWrite(msg, series)
-
-
-def errorWrite(msg, series):
-    with open(os.path.realpath('%s/logFile.err' % series), 'a') as logFileErr:
-      logFileErr.write(msg)
-      logFileErr.flush()
-      logFileErr.close()
-
-def sigIntHandler(signal, frame):
-    # Catch all the CTRL+C
-    sys.stdout.write( '  SigInt Caught, Terminating...\n')
-    sys.exit(0)
-
-
